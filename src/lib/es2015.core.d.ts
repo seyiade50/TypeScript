@@ -256,6 +256,11 @@ interface NumberConstructor {
     parseInt(string: string, radix?: number): number;
 }
 
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
+// credit to @jcalz (stackoverflow)
+
+type Ever<T, U=any> = {[k in keyof T]: T[k] extends never? U: T[k]};
+
 interface ObjectConstructor {
     /**
      * Copy the values of all of the enumerable own properties from one or more source objects to a
@@ -263,7 +268,7 @@ interface ObjectConstructor {
      * @param target The target object to copy to.
      * @param source The source object from which to copy properties.
      */
-    assign<T extends {}, U>(target: T, source: U): T & U;
+    assign<T extends {}, U>(target: T, source: U): Omit<T, keyof U> & U;
 
     /**
      * Copy the values of all of the enumerable own properties from one or more source objects to a
@@ -282,7 +287,7 @@ interface ObjectConstructor {
      * @param source2 The second source object from which to copy properties.
      * @param source3 The third source object from which to copy properties.
      */
-    assign<T extends {}, U, V, W>(target: T, source1: U, source2: V, source3: W): T & U & V & W;
+    assign<T extends {}, U, V, W>(target: T, source1: U, source2: V, source3: W): Omit<T, keyof Omit<U, keyof Omit<V, keyof W>>> & W;
 
     /**
      * Copy the values of all of the enumerable own properties from one or more source objects to a
@@ -290,7 +295,7 @@ interface ObjectConstructor {
      * @param target The target object to copy to.
      * @param sources One or more source objects from which to copy properties
      */
-    assign(target: object, ...sources: any[]): any;
+    assign<T extends object, U extends any[]>(target: object, ...sources: U): Ever<UnionToIntersection<T | U>>;
 
     /**
      * Returns an array of all symbol properties found directly on object o.
