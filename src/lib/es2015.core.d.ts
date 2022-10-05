@@ -259,7 +259,13 @@ interface NumberConstructor {
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 // credit to @jcalz (stackoverflow)
 
-type Ever<T, U=any> = {[k in keyof T]: T[k] extends never? U: T[k]};
+type Ever<T, U=any> = {
+    [k in keyof T]: (T[k] extends never? U: Ever<T[k]>)
+};
+
+interface E<T> {
+    [k: string]: T;
+}
 
 interface ObjectConstructor {
     /**
